@@ -1,6 +1,6 @@
 /**
  * Shared session cookie name. Kept in its own tiny, dependency-free module
- * so it can be imported from `src/proxy.ts` (Edge runtime) without pulling
+ * so it can be imported from `src/middleware.ts` (Edge runtime) without pulling
  * in `firebase-admin` (Node-only), which lives behind `@/server/auth-actions`.
  */
 export const SESSION_COOKIE_NAME = "wasty_admin_session";

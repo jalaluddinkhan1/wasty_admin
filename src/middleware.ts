@@ -7,8 +7,9 @@ import { getDataProvider } from "@/lib/firebase/config";
 /**
  * Guards `/dashboard/*` for production providers (firebase + aws).
  * SQLite stays open only for local demo without auth setup.
+ * Amplify Hosting SSR targets Next.js 15, which uses middleware (not proxy).
  */
-export function proxy(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (!pathname.startsWith("/dashboard")) {

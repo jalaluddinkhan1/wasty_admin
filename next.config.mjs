@@ -1,15 +1,10 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const appRoot = path.dirname(fileURLToPath(import.meta.url));
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {
-    root: appRoot,
-  },
   output: "standalone",
-  reactCompiler: true,
+  experimental: {
+    // Next 15: reactCompiler lives under experimental (top-level in Next 16+)
+    reactCompiler: true,
+  },
   typescript: {
     // aws provider unions were incomplete; do not block production deploy on leftover demo-route typings
     ignoreBuildErrors: true,

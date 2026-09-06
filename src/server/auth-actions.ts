@@ -5,7 +5,7 @@
  * console. The login form signs in with the Firebase Web SDK, then calls
  * `createSession` here with the resulting ID token. We verify it with the
  * Admin SDK, require the `admin` custom claim, and set an httpOnly cookie
- * that `src/proxy.ts` checks on every `/dashboard/*` request.
+ * that `src/middleware.ts` checks on every `/dashboard/*` request.
  */
 import { cookies, headers } from "next/headers";
 
