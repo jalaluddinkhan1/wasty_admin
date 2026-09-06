@@ -46,12 +46,15 @@ function resolveServiceAccountPath(): string | null {
 }
 
 function loadServiceAccountFromJsonEnv(): ServiceAccountLike | null {
-  const raw = process.env.FIREBASE_ADMIN_SDK_JSON?.trim();
+  const b64 = process.env.FIREBASE_ADMIN_SDK_JSON_BASE64?.trim();
+  const raw = b64
+    ? Buffer.from(b64, "base64").toString("utf8")
+    : process.env.FIREBASE_ADMIN_SDK_JSON?.trim();
   if (!raw) return null;
   try {
     return JSON.parse(raw) as ServiceAccountLike;
   } catch (error) {
-    console.error("[wasty] Failed to parse FIREBASE_ADMIN_SDK_JSON:", error);
+    console.error("[wasty] Failed to parse FIREBASE_ADMIN_SDK_JSON(_BASE64):", error);
     return null;
   }
 }

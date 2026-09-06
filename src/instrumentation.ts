@@ -6,11 +6,8 @@ export async function register() {
   try {
     assertProductionEnvironment();
   } catch (error) {
-    // Allow `next build` in CI/local with dev env; fail at runtime (`next start`).
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      console.error("[wasty]", error instanceof Error ? error.message : error);
-      return;
-    }
-    throw error;
+    // Never crash the whole SSR process — Amplify Hosting returns opaque 500s if we throw here.
+    // Health + login surfaces misconfig instead of taking the site down.
+    console.error("[wasty] production env check:", error instanceof Error ? error.message : error);
   }
 }

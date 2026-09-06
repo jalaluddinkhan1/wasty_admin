@@ -48,6 +48,8 @@ export function isFirebaseAdminEnvPresent(): boolean {
   return Boolean(
     process.env.FIREBASE_ADMIN_SDK_PATH ||
       process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+      process.env.FIREBASE_ADMIN_SDK_JSON_BASE64 ||
+      process.env.FIREBASE_ADMIN_SDK_JSON ||
       (process.env.FIREBASE_ADMIN_PROJECT_ID &&
         process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
         process.env.FIREBASE_ADMIN_PRIVATE_KEY),
