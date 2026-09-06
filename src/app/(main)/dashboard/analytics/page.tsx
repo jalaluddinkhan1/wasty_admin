@@ -9,7 +9,13 @@ import { AnalyticsClient } from "./_components/analytics-client";
 export default async function AnalyticsPage({ searchParams }: { searchParams: Promise<{ range?: string }> }) {
   const params = await searchParams;
   const range = parseAnalyticsRange(params.range);
-  const [dashboard, session] = await Promise.all([getAnalyticsDashboard(range), getEffectiveSession()]);
+  const [dashboard, session] = await Promise.all([
+    getAnalyticsDashboard(range).catch(async () => {
+      const { demoAnalyticsDashboard } = await import("@/lib/analytics/demo");
+      return demoAnalyticsDashboard(range);
+    }),
+    getEffectiveSession(),
+  ]);
   const adminType = session?.adminType ?? "owner";
 
   return (

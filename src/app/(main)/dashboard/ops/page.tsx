@@ -27,8 +27,8 @@ export default async function OpsPage() {
   const provider = getDataProvider();
   const dbStatus = await getDbStatus();
   const trends = await getAnalyticsDashboard("7d")
-    .then((d) => d.jobTrends)
-    .catch(() => []);
+    .then((d) => d.jobTrends ?? [])
+    .catch(() => [] as Awaited<ReturnType<typeof getAnalyticsDashboard>>["jobTrends"]);
 
   const [commandStats, pickupRows, tickets] = await Promise.all([
     getCommandCenterStats(),

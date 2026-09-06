@@ -109,9 +109,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             role="status"
             className="mb-4 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm"
           >
-            <strong className="font-semibold">Production admin.</strong> Data comes from AWS DynamoDB via{" "}
-            <code className="text-xs">WASTY_API_BASE_URL</code>. Set{" "}
-            <code className="text-xs">WASTY_DATA_PROVIDER=aws</code> in <code className="text-xs">.env.local</code>.
+            <strong className="font-semibold">Live AWS mode.</strong> Dashboard data is loaded from DynamoDB through
+            the Wasty API.
           </div>
           <DashboardAccessGate adminType={adminType}>{children}</DashboardAccessGate>
         </div>

@@ -192,36 +192,36 @@ export async function forceJobStatus(jobId: string, status: string) {
 // ---------------------------------------------------------------------------
 
 export async function listPartners(): Promise<PartnerRecord[]> {
-  await requirePermission("partners:read");
+  await requirePermission("people:read");
   const res = await api.listPartners();
   return (res.partners as Record<string, unknown>[]).map(mapPartner);
 }
 
 export async function invitePartner(_input: { name: string; phone: string; zone: string; vehicle: string }) {
-  await requirePermission("partners:write");
+  await requirePermission("people:write");
   throw new Error("Partner invite via AWS API is not implemented yet — use Partner app signup + KYC approval.");
 }
 
 export async function approvePartner(partnerId: string) {
-  await requirePermission("partners:write");
+  await requirePermission("people:write");
   await api.patchPartner(partnerId, { kycStatus: "approved" });
   revalidatePath("/dashboard/partners");
 }
 
 export async function rejectPartner(partnerId: string, reason?: string) {
-  await requirePermission("partners:write");
+  await requirePermission("people:write");
   await api.patchPartner(partnerId, { kycStatus: "rejected", rejectionReason: reason ?? null });
   revalidatePath("/dashboard/partners");
 }
 
 export async function setPartnerStatus(uid: string, status: string) {
-  await requirePermission("partners:write");
+  await requirePermission("people:write");
   await api.patchPartner(uid, { status });
   revalidatePath("/dashboard/partners");
 }
 
 export async function updatePartnerProfile(uid: string, patch: Record<string, unknown>) {
-  await requirePermission("partners:write");
+  await requirePermission("people:write");
   await api.patchPartner(uid, patch);
   revalidatePath("/dashboard/partners");
 }
@@ -231,13 +231,13 @@ export async function updatePartnerProfile(uid: string, patch: Record<string, un
 // ---------------------------------------------------------------------------
 
 export async function listBagsRegistry(): Promise<BagRegistryRecord[]> {
-  await requirePermission("bags:read");
+  await requirePermission("assets:read");
   const res = await api.listBags();
   return (res.bags as Record<string, unknown>[]).map(mapBag);
 }
 
 export async function issueBagCodes(count: number, prefix: string) {
-  await requirePermission("bags:write");
+  await requirePermission("assets:write");
   const res = await api.generateBagBatch({ count, prefix });
   revalidatePath("/dashboard/bags");
   return {
@@ -248,7 +248,7 @@ export async function issueBagCodes(count: number, prefix: string) {
 }
 
 export async function voidBagCode(code: string) {
-  await requirePermission("bags:write");
+  await requirePermission("assets:write");
   await api.voidBag(code);
   revalidatePath("/dashboard/bags");
 }
@@ -258,7 +258,7 @@ export async function voidBagCode(code: string) {
 // ---------------------------------------------------------------------------
 
 export async function listOpsReports(filters?: { limit?: number }) {
-  await requirePermission("support:read");
+  await requirePermission("ops:read");
   const res = await api.listOps("open");
   let rows = (res.ops as Record<string, unknown>[]).map(mapOps);
   if (filters?.limit) rows = rows.slice(0, filters.limit);
@@ -266,19 +266,19 @@ export async function listOpsReports(filters?: { limit?: number }) {
 }
 
 export async function ackOpsReport(id: string, note?: string) {
-  await requirePermission("support:write");
+  await requirePermission("ops:write");
   await api.patchOps(id, { status: "acknowledged", note });
   revalidatePath("/dashboard/support");
 }
 
 export async function closeOpsReport(id: string, note?: string) {
-  await requirePermission("support:write");
+  await requirePermission("ops:write");
   await api.patchOps(id, { status: "closed", note });
   revalidatePath("/dashboard/support");
 }
 
 export async function replyOpsReport(id: string, note: string) {
-  await requirePermission("support:write");
+  await requirePermission("ops:write");
   await api.patchOps(id, { note });
   revalidatePath("/dashboard/support");
 }
@@ -288,7 +288,7 @@ export async function replyOpsReport(id: string, note: string) {
 // ---------------------------------------------------------------------------
 
 export async function listUsers(limit = 300) {
-  await requirePermission("users:read");
+  await requirePermission("people:read");
   const res = await api.listUsers();
   return (res.users as Record<string, unknown>[]).slice(0, limit).map((u) => ({
     id: String(u.uid ?? u.id ?? ""),
@@ -304,19 +304,19 @@ export async function listUsers(limit = 300) {
 }
 
 export async function adjustWallet(uid: string, pointsDelta: number, reason?: string) {
-  await requirePermission("users:write");
+  await requirePermission("people:write");
   await api.patchUser(uid, { pointsDelta, reason });
   revalidatePath("/dashboard/users");
 }
 
 export async function setUserSuspended(uid: string, suspended: boolean, reason?: string) {
-  await requirePermission("users:write");
+  await requirePermission("people:write");
   await api.patchUser(uid, { suspended, suspendReason: reason ?? null });
   revalidatePath("/dashboard/users");
 }
 
 export async function listUserActivity(uid: string) {
-  await requirePermission("users:read");
+  await requirePermission("people:read");
   return { uid, events: [] as { type: string; at: string; detail: string }[] };
 }
 
@@ -325,7 +325,7 @@ export async function listUserActivity(uid: string) {
 // ---------------------------------------------------------------------------
 
 export async function listDailyRoutes(limit = 100) {
-  await requirePermission("routes:read");
+  await requirePermission("ops:read");
   const res = await api.listRoutes();
   return (res.routes as Record<string, unknown>[]).slice(0, limit).map((r) => ({
     id: String(r.id ?? ""),
@@ -343,14 +343,14 @@ export async function createDailyRoute(
   stopIds: string[],
   opts?: { date?: string; note?: string },
 ) {
-  await requirePermission("routes:write");
+  await requirePermission("ops:write");
   await api.offerRoute({ partnerId, stopIds, date: opts?.date, note: opts?.note });
   revalidatePath("/dashboard/routes");
   return { ok: true, id: crypto.randomUUID() };
 }
 
 export async function listPayoutEntries(limit = 500) {
-  await requirePermission("finance:read");
+  await requirePermission("settlements:read");
   const res = await api.listPayouts("requested");
   return (res.requests as Record<string, unknown>[]).slice(0, limit).map((p) => ({
     id: String(p.id ?? p.SK ?? "").replace(/^PAYREQ#/, ""),
@@ -365,7 +365,7 @@ export async function listPayoutEntries(limit = 500) {
 }
 
 export async function getSettlementsSummary() {
-  await requirePermission("finance:read");
+  await requirePermission("settlements:read");
   const entries = await listPayoutEntries(500);
   const pending = entries.filter((e) => !e.settled);
   return {
@@ -376,7 +376,7 @@ export async function getSettlementsSummary() {
 }
 
 export async function markPayoutSettled(_partnerId: string, entryId: string) {
-  await requirePermission("finance:write");
+  await requirePermission("settlements:write");
   await api.settlePayout(entryId);
   revalidatePath("/dashboard/settlements");
 }
@@ -546,7 +546,7 @@ export async function listPushNotificationsHistory(_limit = 50) {
 }
 
 export async function getAppConfig() {
-  await requirePermission("config:read");
+  await requirePermission("config:write");
   const res = await api.getConfig("app");
   return (res.config as Record<string, unknown>) ?? {};
 }
@@ -661,18 +661,44 @@ export async function listAdminAudit() {
   return (res.events as Record<string, unknown>[]) ?? [];
 }
 
-export async function getAnalyticsDashboard(_range?: string) {
-  const cov = await api.coverage();
-  return { coverage: cov, generatedAt: nowIso() };
+export async function getAnalyticsDashboard(range: "7d" | "30d" | "90d" = "30d") {
+  await requirePermission("analytics:read");
+  const { demoAnalyticsDashboard } = await import("@/lib/analytics/demo");
+  const base = demoAnalyticsDashboard(range);
+  try {
+    const [snap, cov] = await Promise.all([api.snapshot(), api.coverage()]);
+    const jobs = (snap.jobs as unknown[]) ?? [];
+    const partners = (snap.partners as unknown[]) ?? [];
+    const alerts = (snap.alerts as unknown[]) ?? [];
+    return {
+      ...base,
+      overview: {
+        ...base.overview,
+        range,
+        totalJobs: jobs.length,
+        activeJobs: jobs.length,
+        completedToday: Number(cov.completedToday ?? 0) || 0,
+        openAlerts: alerts.length,
+        partnersOnline: Number(cov.partnersOnline ?? partners.length) || partners.length,
+        partnersTotal: partners.length,
+        recoveryRate: Number(cov.coveragePct ?? base.overview.recoveryRate) || 0,
+      },
+    };
+  } catch (error) {
+    console.error("[wasty] AWS analytics fallback:", error instanceof Error ? error.message : error);
+    return base;
+  }
 }
 
 export async function getCommandCenterStats() {
   const [snap, cov] = await Promise.all([api.snapshot(), api.coverage()]);
+  const partners = (snap.partners as unknown[]) ?? [];
   return {
-    activeJobs: (snap.jobs as unknown[]).length,
-    onlinePartners: (snap.partners as unknown[]).length,
-    openAlerts: (snap.alerts as unknown[]).length,
-    binsMonitored: (snap.bins as unknown[]).length,
+    activeJobs: ((snap.jobs as unknown[]) ?? []).length,
+    onlinePartners: Number(cov.partnersOnline ?? partners.length) || partners.length,
+    totalPartners: partners.length,
+    openAlerts: ((snap.alerts as unknown[]) ?? []).length,
+    binsMonitored: ((snap.bins as unknown[]) ?? []).length,
     coveragePct: Number(cov.coveragePct ?? 0) || 0,
     completedToday: Number(cov.completedToday ?? 0) || 0,
   };
