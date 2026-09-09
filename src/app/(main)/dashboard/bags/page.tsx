@@ -4,6 +4,6 @@ import { listBags } from "@/server/wasty-actions";
 import { BagsClient } from "./_components/bags-client";
 
 export default async function BagsPage() {
-  const bags = await listBags();
+  const bags = await listBags().catch(() => []);
   return <BagsClient initialBags={bags} provider={getDataProvider()} />;
 }

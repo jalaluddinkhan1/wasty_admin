@@ -330,6 +330,9 @@ const NO_SQLITE_TABLE = (feature: string) =>
   new Error(`${feature} requires the Firebase provider — there's no local SQLite table for this yet.`);
 
 function assertSqlite() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SQLite actions are disabled in production.");
+  }
   if (getDataProvider() !== "sqlite") {
     throw new Error("This action only runs against SQLite. The Firebase provider is active.");
   }
@@ -1259,6 +1262,7 @@ export async function listAdmins() {
 }
 
 export async function grantAdminAccess(email: string, adminType: "owner" | "government" | "ops_manager" | "support") {
+  await requirePermission("roles:manage");
   if (getDataProvider() !== "sqlite") return liveActions().grantAdminAccess(email, adminType);
   return { ok: true };
 }
@@ -1274,11 +1278,13 @@ export async function createStaffAccount(input: {
 }
 
 export async function setAdminType(uid: string, adminType: "owner" | "government" | "ops_manager" | "support") {
+  await requirePermission("roles:manage");
   if (getDataProvider() !== "sqlite") return liveActions().setAdminType(uid, adminType);
   return { ok: true };
 }
 
 export async function revokeAdminAccess(uid: string) {
+  await requirePermission("roles:manage");
   if (getDataProvider() !== "sqlite") return liveActions().revokeAdminAccess(uid);
   return { ok: true };
 }

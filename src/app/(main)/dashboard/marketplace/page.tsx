@@ -4,6 +4,6 @@ import { listProducts } from "@/server/wasty-actions";
 import { MarketplaceClient } from "./_components/marketplace-client";
 
 export default async function MarketplacePage() {
-  const products = await listProducts();
+  const products = await listProducts().catch(() => []);
   return <MarketplaceClient initialProducts={products} provider={getDataProvider()} />;
 }

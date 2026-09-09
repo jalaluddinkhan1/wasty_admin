@@ -12,7 +12,9 @@ export class ForbiddenError extends Error {
   }
 }
 
-function isAuthBypassed() {
+/** Dev-only bypass. Never active in production. */
+export function isAuthBypassed() {
+  if (process.env.NODE_ENV === "production") return false;
   if (process.env.WASTY_AUTH_BYPASS === "1") return true;
   return getDataProvider() === "sqlite";
 }

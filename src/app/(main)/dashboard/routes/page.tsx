@@ -4,7 +4,11 @@ import { listDailyRoutes, listPartners, listPickups } from "@/server/wasty-actio
 import { RoutesClient } from "./_components/routes-client";
 
 export default async function RoutesPage() {
-  const [routes, partners, pickups] = await Promise.all([listDailyRoutes(), listPartners(), listPickups()]);
+  const [routes, partners, pickups] = await Promise.all([
+    listDailyRoutes().catch(() => []),
+    listPartners().catch(() => []),
+    listPickups().catch(() => []),
+  ]);
   return (
     <RoutesClient initialRoutes={routes} partners={partners} jobs={pickups} provider={getDataProvider()} />
   );

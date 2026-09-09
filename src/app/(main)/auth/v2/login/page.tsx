@@ -5,7 +5,8 @@ import { APP_CONFIG } from "@/config/app-config";
 import { DemoRoleButtons } from "../../_components/demo-role-buttons";
 import { LoginForm } from "../../_components/login-form";
 
-const isDemoMode = process.env.WASTY_AUTH_BYPASS === "1";
+const isDemoMode =
+  process.env.WASTY_AUTH_BYPASS === "1" && process.env.NODE_ENV !== "production";
 
 export default function LoginV2() {
   return (

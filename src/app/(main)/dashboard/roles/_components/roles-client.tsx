@@ -108,6 +108,7 @@ export function RolesClient({
         description="Company owners create any staff account (owner, government, ops, support). Public self-signup is closed."
         actions={
           <div className="flex flex-wrap gap-2">
+            {provider !== "aws" ? (
             <ActionDialogButton
               label="Create account"
               title="Create staff account"
@@ -135,10 +136,15 @@ export function RolesClient({
                 router.refresh();
               }}
             />
+            ) : null}
             <ActionDialogButton
               label="Grant existing user"
               title="Grant admin access"
-              description="The email must already exist in Firebase Auth. They keep using /auth/v2/login."
+              description={
+                provider === "aws"
+                  ? "Email must already exist in Firebase Auth. Sets admin role via Wasty API."
+                  : "The email must already exist in Firebase Auth. They keep using /auth/v2/login."
+              }
               submitLabel="Grant"
               successMessage="Admin access granted"
               fields={[

@@ -5,7 +5,7 @@ import { ADMIN_TYPE_COOKIE_NAME, ID_TOKEN_COOKIE_NAME } from "@/lib/auth/session
 
 /** Bearer token for AWS API Gateway (server-side). */
 export async function getServerBearerToken(): Promise<string> {
-  if (process.env.WASTY_AUTH_BYPASS === "1") {
+  if (process.env.WASTY_AUTH_BYPASS === "1" && process.env.NODE_ENV !== "production") {
     let adminType = resolveAdminType(process.env.WASTY_DEV_ADMIN_TYPE);
     try {
       const cookieStore = await cookies();

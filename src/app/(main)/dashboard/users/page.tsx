@@ -4,6 +4,6 @@ import { listUsers } from "@/server/wasty-actions";
 import { UsersClient } from "./_components/users-client";
 
 export default async function UsersPage() {
-  const users = await listUsers();
+  const users = await listUsers().catch(() => []);
   return <UsersClient initialUsers={users} provider={getDataProvider()} />;
 }

@@ -198,6 +198,7 @@ export function PartnersClient({
                 startTransition(() => router.refresh());
               }}
             />
+            {provider !== "aws" ? (
             <ActionDialogButton
               label="Invite partner"
               title="Invite partner"
@@ -253,13 +254,20 @@ export function PartnersClient({
                 startTransition(() => router.refresh());
               }}
             />
+            ) : null}
           </>
         }
       />
 
       <SimpleDataTable
         title="Partner roster"
-        description={provider === "firebase" ? "Source: Firestore (partners)" : "Source: SQLite"}
+        description={
+          provider === "firebase"
+            ? "Source: Firestore (partners)"
+            : provider === "aws"
+              ? "Source: Wasty AWS API — KYC approve/reject works; invite via Partner app signup"
+              : "Source: SQLite"
+        }
         columns={[
           { key: "name", header: "Name" },
           { key: "role", header: "Role" },

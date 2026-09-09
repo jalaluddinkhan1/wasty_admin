@@ -4,6 +4,6 @@ import { listBins } from "@/server/wasty-actions";
 import { BinsClient } from "./_components/bins-client";
 
 export default async function BinsPage() {
-  const bins = await listBins();
+  const bins = await listBins().catch(() => []);
   return <BinsClient initialBins={bins} provider={getDataProvider()} />;
 }

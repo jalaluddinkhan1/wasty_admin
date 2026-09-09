@@ -4,6 +4,9 @@ import { listRewardsCatalog, listUsers } from "@/server/wasty-actions";
 import { RewardsClient } from "./_components/rewards-client";
 
 export default async function RewardsPage() {
-  const [rewards, users] = await Promise.all([listRewardsCatalog(), listUsers()]);
+  const [rewards, users] = await Promise.all([
+    listRewardsCatalog().catch(() => []),
+    listUsers().catch(() => []),
+  ]);
   return <RewardsClient initialRewards={rewards} users={users} provider={getDataProvider()} />;
 }

@@ -82,6 +82,27 @@ export async function destroySession() {
   return { ok: true };
 }
 
+/** Refresh the AWS Bearer ID token cookie without recreating the session. */
+export async function refreshIdTokenCookie(idToken: string) {
+  if (!idToken) return { ok: false as const };
+  if (!isFirebaseAdminReady()) return { ok: false as const };
+  try {
+    const decoded = await getAdminAuth().verifyIdToken(idToken, true);
+    if (decoded.role !== "admin") return { ok: false as const };
+    const cookieStore = await cookies();
+    cookieStore.set(ID_TOKEN_COOKIE_NAME, idToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 55 * 60,
+    });
+    return { ok: true as const };
+  } catch {
+    return { ok: false as const };
+  }
+}
+
 export async function getSessionUser(): Promise<SessionUser | null> {
   if (!isFirebaseAdminReady()) return null;
   const cookieStore = await cookies();

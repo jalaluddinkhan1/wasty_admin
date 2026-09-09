@@ -77,9 +77,12 @@ export function P2pClient({
         description={
           provider === "firebase"
             ? "Peer-to-peer waste marketplace — connect sellers to buyers with offers, QC, and escrow."
-            : "No local SQLite P2P listings — switch to Firebase for the trade board."
+            : provider === "aws"
+              ? "Listings are read-only on AWS until P2P write APIs are enabled."
+              : "No local SQLite P2P listings — switch to Firebase for the trade board."
         }
         actions={
+          provider === "firebase" || provider === "sqlite" ? (
           <>
             <ActionDialogButton
               label="Disputes"
@@ -158,6 +161,7 @@ export function P2pClient({
               }}
             />
           </>
+          ) : null
         }
       />
 

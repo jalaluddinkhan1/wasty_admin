@@ -67,6 +67,9 @@ export function CitizenReportsClient({
     status: CitizenReportStatus,
     note?: string,
   ) {
+    if (provider === "aws") {
+      throw new Error("Citizen report triage is not available on the AWS API yet.");
+    }
     await updateCitizenReportStatus(row.userId, row.id, status, note);
     setRows((prev) =>
       prev.map((r) =>
@@ -85,7 +88,9 @@ export function CitizenReportsClient({
         description={
           provider === "firebase"
             ? "Inbox from users/{uid}/reports — acknowledge, resolve, or escalate with notes."
-            : "Demo citizen report inbox for triage workflow testing."
+            : provider === "aws"
+              ? "Read-only inbox on AWS until report status APIs are enabled."
+              : "Demo citizen report inbox for triage workflow testing."
         }
         actions={
           <ExportCsvButton
@@ -221,7 +226,7 @@ export function CitizenReportsClient({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-wrap justify-end gap-1">
-                        {row.status === "submitted" ? (
+                        {provider !== "aws" && row.status === "submitted" ? (
                           <ActionDialogButton
                             label="Acknowledge"
                             title="Acknowledge report"
@@ -238,7 +243,7 @@ export function CitizenReportsClient({
                             onSubmit={(values) => triage(row, "in_progress", values.note)}
                           />
                         ) : null}
-                        {row.status !== "resolved" ? (
+                        {provider !== "aws" && row.status !== "resolved" ? (
                           <ActionDialogButton
                             label="Resolve"
                             title="Resolve report"

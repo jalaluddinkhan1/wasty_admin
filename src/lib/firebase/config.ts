@@ -59,19 +59,26 @@ export function isFirebaseAdminEnvPresent(): boolean {
 /**
  * Resolves which backend server actions should use.
  *
- * - `WASTY_DATA_PROVIDER=sqlite` always forces local SQLite.
- * - `WASTY_DATA_PROVIDER=firebase` uses Firebase if Admin credentials are
- *   present, otherwise falls back to SQLite with a console warning.
- * - Unset → prefer Firebase automatically once Admin credentials are
- *   present, otherwise SQLite (keeps local dev working with zero config).
+ * - `WASTY_DATA_PROVIDER=sqlite` always forces local SQLite (dev only in practice).
+ * - `WASTY_DATA_PROVIDER=aws` requires `WASTY_API_BASE_URL`; production never falls back to sqlite.
+ * - `WASTY_DATA_PROVIDER=firebase` uses Firebase if Admin credentials are present.
+ * - Unset → prefer Firebase once Admin credentials are present, otherwise SQLite (local zero-config).
  */
 export function getDataProvider(): "sqlite" | "firebase" | "aws" {
   const raw = (process.env.WASTY_DATA_PROVIDER ?? "").trim().toLowerCase();
+  const isProd = process.env.NODE_ENV === "production";
 
   if (raw === "sqlite") return "sqlite";
 
   if (raw === "aws") {
     if (!process.env.WASTY_API_BASE_URL?.trim()) {
+      if (isProd) {
+        console.error(
+          "[wasty] WASTY_DATA_PROVIDER=aws but WASTY_API_BASE_URL is missing — refusing sqlite fallback in production",
+        );
+        // Stay on aws so auth still requires a real session; API calls will fail closed.
+        return "aws";
+      }
       console.warn(
         "[wasty] WASTY_DATA_PROVIDER=aws but WASTY_API_BASE_URL is missing — falling back to sqlite",
       );
@@ -82,11 +89,20 @@ export function getDataProvider(): "sqlite" | "firebase" | "aws" {
 
   if (raw === "firebase") {
     if (!isFirebaseAdminEnvPresent()) {
+      if (isProd) {
+        console.error(
+          "[wasty] WASTY_DATA_PROVIDER=firebase but Admin credentials are missing — refusing sqlite fallback in production",
+        );
+        return "firebase";
+      }
       console.warn("[wasty] WASTY_DATA_PROVIDER=firebase but Admin credentials are missing — falling back to sqlite");
       return "sqlite";
     }
     return "firebase";
   }
 
+  if (isProd) {
+    return isFirebaseAdminEnvPresent() ? "firebase" : "aws";
+  }
   return isFirebaseAdminEnvPresent() ? "firebase" : "sqlite";
 }

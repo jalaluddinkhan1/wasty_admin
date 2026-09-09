@@ -152,6 +152,7 @@ function vehicleColor(status: string, active: boolean) {
 // ---------------------------------------------------------------------------
 
 export async function getDbStatus() {
+  await requirePermission("ops:read");
   await api.health();
   return { message: `AWS DynamoDB via ${process.env.WASTY_API_BASE_URL}` };
 }
@@ -542,6 +543,7 @@ export async function sendPushNotification(_input: { title: string; body: string
 }
 
 export async function listPushNotificationsHistory(_limit = 50) {
+  await requirePermission("notifications:read");
   return [];
 }
 
@@ -560,7 +562,7 @@ export async function saveAppConfig(patch: Record<string, unknown>) {
 export async function listZones() {
   await requirePermission("assets:read");
   const res = await api.listZones();
-  return res.zones as Record<string, unknown>[];
+  return ((res.zones as Record<string, unknown>[]) ?? []);
 }
 
 export async function upsertZone(input: Record<string, unknown>) {
@@ -571,78 +573,93 @@ export async function upsertZone(input: Record<string, unknown>) {
 }
 
 export async function listMrfFacilities() {
+  await requirePermission("mrf:read");
   const res = await api.listMrf();
-  return res.mrf as Record<string, unknown>[];
+  return ((res.mrf as Record<string, unknown>[]) ?? []);
 }
 
 export async function upsertMrfFacility(input: Record<string, unknown>) {
+  await requirePermission("mrf:write");
   await api.upsertMrf(input);
   revalidatePath("/dashboard/mrf");
   return { id: String(input.id ?? "") };
 }
 
 export async function listMrfInbound() {
+  await requirePermission("mrf:read");
   return [];
 }
 
 export async function logMrfInbound(_input: Record<string, unknown>) {
-  revalidatePath("/dashboard/mrf");
-  return { ok: true };
+  await requirePermission("mrf:write");
+  throw new Error("MRF inbound logging is not available on the AWS API yet.");
 }
 
 export async function ensureAiJobsFromPickups() {
-  /* no-op on AWS */
+  await requirePermission("ops:write");
 }
 
 export async function listAiJobs() {
+  await requirePermission("ops:read");
   return [];
 }
 
 export async function overrideAiJob(_id: string, _category: string) {
-  return { ok: true };
+  await requirePermission("ops:write");
+  throw new Error("AI override is not available on the AWS API yet.");
 }
 
 export async function setAiModelVersion(_model: string) {
-  return { ok: true };
+  await requirePermission("config:write");
+  throw new Error("AI model version is not configurable on AWS yet.");
 }
 
 export async function getAiModelVersion() {
+  await requirePermission("ops:read");
   return "aws-default";
 }
 
 export async function listMaterialLots() {
+  await requirePermission("assets:read");
   const res = await api.listInventory();
-  return res.lots as Record<string, unknown>[];
+  return ((res.lots as Record<string, unknown>[]) ?? []);
 }
 
 export async function upsertMaterialLot(input: Record<string, unknown>) {
+  await requirePermission("assets:write");
   await api.upsertInventory(input);
   revalidatePath("/dashboard/inventory");
   return { id: String(input.id ?? "") };
 }
 
 export async function listP2pListings() {
+  await requirePermission("commerce:read");
   const res = await api.listP2p();
-  return res.listings as Record<string, unknown>[];
+  return ((res.listings as Record<string, unknown>[]) ?? []);
 }
 
 export async function createP2pListing(_input: Record<string, unknown>) {
-  throw new Error("P2P create not on AWS API yet");
+  await requirePermission("commerce:write");
+  throw new Error("P2P create is not available on the AWS API yet.");
 }
 
 export async function resolveP2pDispute(_id: string, _resolution: string, _note?: string) {
-  return { ok: true };
+  await requirePermission("commerce:write");
+  throw new Error("P2P dispute resolve is not available on the AWS API yet.");
 }
 
 export async function listBuyers() {
+  await requirePermission("people:read");
   return [];
 }
 
 export async function upsertBuyer(_input: Record<string, unknown>) {
-  return { id: "" };
+  await requirePermission("people:write");
+  throw new Error("Buyer management is not available on the AWS API yet.");
 }
 
 export async function getImpactStats() {
+  await requirePermission("impact:read");
   const { demoImpactStats } = await import("@/lib/analytics/demo");
   const base = demoImpactStats("30d");
   try {
@@ -664,10 +681,12 @@ export async function getImpactStats() {
 }
 
 export async function lookupPassport(id: string) {
+  await requirePermission("passport:read");
   return { id, found: false, summary: "Passport lookup requires full AWS deploy" };
 }
 
 export async function listAdminAudit() {
+  await requirePermission("audit:read");
   const res = await api.audit();
   return (res.events as Record<string, unknown>[]) ?? [];
 }
@@ -703,6 +722,7 @@ export async function getAnalyticsDashboard(range: "7d" | "30d" | "90d" = "30d")
 }
 
 export async function getCommandCenterStats() {
+  await requirePermission("ops:read");
   try {
     const [snap, cov] = await Promise.all([api.snapshot(), api.coverage()]);
     const jobs = (snap.jobs as unknown[]) ?? [];
@@ -734,11 +754,13 @@ export async function getCommandCenterStats() {
 }
 
 export async function getComplianceDashboard(range: "7d" | "30d" | "90d" = "30d") {
+  await requirePermission("compliance:read");
   const { demoComplianceDashboard } = await import("@/lib/analytics/demo");
   return demoComplianceDashboard(range);
 }
 
 export async function getCommandDeskData(range: "7d" | "30d" | "90d" = "30d") {
+  await requirePermission("compliance:read");
   const { demoCommandDesk } = await import("@/lib/government/demo");
   const base = demoCommandDesk(range);
   try {
@@ -813,34 +835,41 @@ export async function updateCitizenReportStatus(
   _status: string,
   _note?: string,
 ) {
-  return { ok: true };
+  await requirePermission("citizen_reports:triage");
+  throw new Error("Citizen report status updates are not available on the AWS API yet.");
 }
 
 export async function getGovernmentCaseQueue() {
+  await requirePermission("compliance:read");
   return [];
 }
 
 export async function listGovernmentJobs(_filters?: Record<string, unknown>) {
+  await requirePermission("compliance:read");
   const jobs = await listJobs({ limit: 200 });
   return jobs;
 }
 
 export async function getGovernmentJobDetail(jobId: string) {
+  await requirePermission("compliance:read");
   const jobs = await listJobs({ limit: 500 });
   return jobs.find((j) => j.id === jobId) ?? null;
 }
 
 export async function listGovernmentHouseholds(_filters?: Record<string, unknown>) {
+  await requirePermission("compliance:read");
   const users = await listUsers(200);
   return users;
 }
 
 export async function getGovernmentHouseholdProfile(uid: string) {
+  await requirePermission("compliance:read");
   const users = await listUsers(500);
   return users.find((u) => u.id === uid) ?? null;
 }
 
 export async function listGovernmentAudit(limit = 100) {
+  await requirePermission("audit:read");
   const events = await listAdminAudit();
   return events.slice(0, limit);
 }
@@ -932,28 +961,34 @@ export async function getLiveMapSnapshot(): Promise<LiveMapSnapshot> {
 }
 
 export async function listAdmins() {
+  await requirePermission("roles:manage");
   return [];
 }
 
 export async function grantAdminAccess(email: string, adminType: string) {
+  await requirePermission("roles:manage");
   await api.grantRole({ uid: email, adminType, email });
   revalidatePath("/dashboard/roles");
   return { ok: true };
 }
 
 export async function createStaffAccount(_input: Record<string, unknown>) {
-  throw new Error("Staff account creation: use Firebase console + grantRole");
+  await requirePermission("roles:manage");
+  throw new Error("Staff account creation: use Firebase console, then Grant role here.");
 }
 
 export async function setAdminType(uid: string, adminType: string) {
+  await requirePermission("roles:manage");
   await api.grantRole({ uid, adminType });
   revalidatePath("/dashboard/roles");
 }
 
 export async function revokeAdminAccess(_uid: string) {
-  throw new Error("Revoke admin: use Firebase console");
+  await requirePermission("roles:manage");
+  throw new Error("Revoke admin: use Firebase console to clear the admin claim.");
 }
 
 export async function syncSince(since = 0) {
+  await requirePermission("ops:read");
   return api.syncSince(since);
 }

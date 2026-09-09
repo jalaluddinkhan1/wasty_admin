@@ -12,7 +12,8 @@
     "check:fix": "biome check --write",
     "prepare": "husky",
     "db:studio": "drizzle-kit studio",
-    "generate:presets": "ts-node -P tsconfig.scripts.json src/scripts/generate-theme-presets.ts"
+    "generate:presets": "ts-node -P tsconfig.scripts.json src/scripts/generate-theme-presets.ts",
+    "e2e:admin": "node e2e/admin-auth-smoke.mjs"
   },
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [

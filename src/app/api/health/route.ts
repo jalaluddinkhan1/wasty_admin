@@ -25,8 +25,25 @@ export async function GET() {
   const healthy =
     (provider === "aws" || provider === "firebase" || (!isProd && provider === "sqlite")) &&
     (provider !== "firebase" || firebaseReady) &&
+    !(isProd && authBypass) &&
     misconfig.length === 0;
   const status = healthy ? 200 : 503;
+
+  // Production: opaque health only — do not leak bypass / misconfig details.
+  if (isProd) {
+    return NextResponse.json(
+      {
+        ok: healthy,
+        service: "wasty-admin",
+        status: healthy ? "up" : "degraded",
+        timestamp: new Date().toISOString(),
+      },
+      {
+        status,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
+  }
 
   return NextResponse.json(
     {

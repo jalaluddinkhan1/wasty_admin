@@ -4,13 +4,17 @@ import { cookies } from "next/headers";
 
 import {
   getPreferencePersistence,
+  PREFERENCE_KEYS,
   PREFERENCE_REGISTRY,
   type PreferenceKey,
   type PreferenceValueMap,
   parsePreference,
 } from "@/lib/preferences/preferences-config";
 
+const ALLOWED_COOKIE_KEYS = new Set<string>([...PREFERENCE_KEYS, "sidebar_state"]);
+
 export async function getValueFromCookie(key: string): Promise<string | undefined> {
+  if (!ALLOWED_COOKIE_KEYS.has(key)) return undefined;
   const cookieStore = await cookies();
   return cookieStore.get(key)?.value;
 }
@@ -20,6 +24,9 @@ export async function setValueToCookie(
   value: string,
   options: { path?: string; maxAge?: number } = {},
 ): Promise<void> {
+  if (!ALLOWED_COOKIE_KEYS.has(key)) {
+    throw new Error(`Cookie key not allowed: ${key}`);
+  }
   const cookieStore = await cookies();
   cookieStore.set(key, value, {
     path: options.path ?? "/",

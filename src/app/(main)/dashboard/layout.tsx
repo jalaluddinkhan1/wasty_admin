@@ -1,18 +1,20 @@
 import type { ReactNode } from "react";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { filterSidebarItems } from "@/lib/auth/nav-filter";
-import { ADMIN_TYPE_LABELS, defaultLandingFor } from "@/lib/auth/permissions";
+import { ADMIN_TYPE_LABELS, defaultLandingFor, resolveAdminType } from "@/lib/auth/permissions";
 import { getEffectiveSession } from "@/lib/auth/require-admin";
 import { cn } from "@/lib/utils";
 import { sidebarItems } from "@/navigation/sidebar/sidebar-items";
 import { getPreference } from "@/server/server-actions";
 
 import { DashboardAccessGate } from "./_components/dashboard-access-gate";
+import { SessionKeepAlive } from "./_components/session-keep-alive";
 import { AccountSwitcher } from "./_components/sidebar/account-switcher";
 import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
@@ -22,7 +24,10 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
   const session = await getEffectiveSession();
-  const adminType = session?.adminType ?? "owner";
+  if (!session || session.role !== "admin") {
+    redirect("/auth/v2/login?redirect=/dashboard");
+  }
+  const adminType = resolveAdminType(session.adminType);
   const navGroups = filterSidebarItems(sidebarItems, adminType);
   // Next.js server -> client props must be plain JSON. `icon` is a React component
   // function, which causes serialization warnings and slows rendering.
@@ -47,8 +52,8 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
     }),
   }));
   const account = {
-    name: session?.email?.split("@")[0] ?? "Wasty Admin",
-    email: session?.email ?? "ops@wasty.app",
+    name: session.email?.split("@")[0] ?? "Wasty Admin",
+    email: session.email ?? "ops@wasty.app",
     role: ADMIN_TYPE_LABELS[adminType],
   };
   const [variant, collapsible] = await Promise.all([
@@ -110,10 +115,12 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             className="mb-4 rounded-md border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm"
           >
             <strong className="font-semibold">Live AWS mode.</strong> Dashboard pages load through the Wasty API.
-            If a section fails, open another menu item or tap Try again — empty DynamoDB data will show demo
-            placeholders, not a blank crash.
+            Sign-in is required — actions are permission-checked.
           </div>
-          <DashboardAccessGate adminType={adminType}>{children}</DashboardAccessGate>
+          <DashboardAccessGate adminType={adminType}>
+            <SessionKeepAlive />
+            {children}
+          </DashboardAccessGate>
         </div>
       </SidebarInset>
     </SidebarProvider>

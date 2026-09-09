@@ -4,6 +4,6 @@ import { listCitizenReports } from "@/server/wasty-actions";
 import { CitizenReportsClient } from "../_components/citizen-reports-client";
 
 export default async function CitizenReportsPage() {
-  const reports = await listCitizenReports();
+  const reports = await listCitizenReports().catch(() => []);
   return <CitizenReportsClient initialReports={reports} provider={getDataProvider()} />;
 }
