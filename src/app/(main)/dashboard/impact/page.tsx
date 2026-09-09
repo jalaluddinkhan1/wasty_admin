@@ -4,6 +4,7 @@ import { getImpactStats } from "@/server/wasty-actions";
 import { ImpactClient } from "./_components/impact-client";
 
 export default async function ImpactPage() {
-  const stats = await getImpactStats();
+  const { demoImpactStats } = await import("@/lib/analytics/demo");
+  const stats = await getImpactStats().catch(() => demoImpactStats("30d"));
   return <ImpactClient stats={stats} provider={getDataProvider()} />;
 }

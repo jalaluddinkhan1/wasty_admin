@@ -11,6 +11,7 @@ export default async function GovZonesPage({
 }) {
   const params = await searchParams;
   const range = parseAnalyticsRange(params.range);
-  const data = await getComplianceDashboard(range);
-  return <GovZonesClient range={range} areas={data.areas} provider={getDataProvider()} />;
+  const { demoComplianceDashboard } = await import("@/lib/analytics/demo");
+  const data = await getComplianceDashboard(range).catch(() => demoComplianceDashboard(range));
+  return <GovZonesClient range={range} areas={data.areas ?? []} provider={getDataProvider()} />;
 }

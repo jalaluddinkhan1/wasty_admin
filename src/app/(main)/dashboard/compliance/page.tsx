@@ -11,6 +11,7 @@ export default async function CompliancePage({
 }) {
   const params = await searchParams;
   const range = parseAnalyticsRange(params.range);
-  const data = await getCommandDeskData(range);
+  const { demoCommandDesk } = await import("@/lib/government/demo");
+  const data = await getCommandDeskData(range).catch(() => demoCommandDesk(range));
   return <CommandDeskClient data={data} range={range} provider={getDataProvider()} />;
 }

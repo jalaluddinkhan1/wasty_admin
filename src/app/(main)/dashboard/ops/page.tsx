@@ -31,9 +31,16 @@ export default async function OpsPage() {
     .catch(() => [] as Awaited<ReturnType<typeof getAnalyticsDashboard>>["jobTrends"]);
 
   const [commandStats, pickupRows, tickets] = await Promise.all([
-    getCommandCenterStats(),
-    listPickups(),
-    listSupportTickets(),
+    getCommandCenterStats().catch(() => ({
+      totalJobs: 0,
+      activeJobs: 0,
+      completedToday: 0,
+      totalPartners: 0,
+      onlinePartners: 0,
+      openAlerts: 0,
+    })),
+    listPickups().catch(() => []),
+    listSupportTickets().catch(() => []),
   ]);
 
   const stats = {

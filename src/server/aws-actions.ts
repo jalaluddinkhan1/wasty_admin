@@ -159,7 +159,7 @@ export async function getDbStatus() {
 export async function listJobs(filters?: { status?: string; partnerId?: string; limit?: number }) {
   await requirePermission("ops:read");
   const res = await api.listJobs();
-  let jobs = (res.jobs as Record<string, unknown>[]).map(mapJob);
+  let jobs = ((res.jobs as Record<string, unknown>[]) ?? []).map(mapJob);
   if (filters?.status) jobs = jobs.filter((j) => j.status === filters.status);
   if (filters?.partnerId) jobs = jobs.filter((j) => j.assignedPartnerId === filters.partnerId);
   if (filters?.limit) jobs = jobs.slice(0, filters.limit);
@@ -194,7 +194,7 @@ export async function forceJobStatus(jobId: string, status: string) {
 export async function listPartners(): Promise<PartnerRecord[]> {
   await requirePermission("people:read");
   const res = await api.listPartners();
-  return (res.partners as Record<string, unknown>[]).map(mapPartner);
+  return ((res.partners as Record<string, unknown>[]) ?? []).map(mapPartner);
 }
 
 export async function invitePartner(_input: { name: string; phone: string; zone: string; vehicle: string }) {
@@ -233,7 +233,7 @@ export async function updatePartnerProfile(uid: string, patch: Record<string, un
 export async function listBagsRegistry(): Promise<BagRegistryRecord[]> {
   await requirePermission("assets:read");
   const res = await api.listBags();
-  return (res.bags as Record<string, unknown>[]).map(mapBag);
+  return ((res.bags as Record<string, unknown>[]) ?? []).map(mapBag);
 }
 
 export async function issueBagCodes(count: number, prefix: string) {
@@ -260,7 +260,7 @@ export async function voidBagCode(code: string) {
 export async function listOpsReports(filters?: { limit?: number }) {
   await requirePermission("ops:read");
   const res = await api.listOps("open");
-  let rows = (res.ops as Record<string, unknown>[]).map(mapOps);
+  let rows = ((res.ops as Record<string, unknown>[]) ?? []).map(mapOps);
   if (filters?.limit) rows = rows.slice(0, filters.limit);
   return rows;
 }
@@ -290,7 +290,7 @@ export async function replyOpsReport(id: string, note: string) {
 export async function listUsers(limit = 300) {
   await requirePermission("people:read");
   const res = await api.listUsers();
-  return (res.users as Record<string, unknown>[]).slice(0, limit).map((u) => ({
+  return ((res.users as Record<string, unknown>[]) ?? []).slice(0, limit).map((u) => ({
     id: String(u.uid ?? u.id ?? ""),
     name: String(u.name ?? u.displayName ?? "User"),
     email: String(u.email ?? ""),
@@ -327,7 +327,7 @@ export async function listUserActivity(uid: string) {
 export async function listDailyRoutes(limit = 100) {
   await requirePermission("ops:read");
   const res = await api.listRoutes();
-  return (res.routes as Record<string, unknown>[]).slice(0, limit).map((r) => ({
+  return ((res.routes as Record<string, unknown>[]) ?? []).slice(0, limit).map((r) => ({
     id: String(r.id ?? ""),
     partnerId: String(r.partnerId ?? ""),
     status: String(r.status ?? "offered"),
@@ -352,7 +352,7 @@ export async function createDailyRoute(
 export async function listPayoutEntries(limit = 500) {
   await requirePermission("settlements:read");
   const res = await api.listPayouts("requested");
-  return (res.requests as Record<string, unknown>[]).slice(0, limit).map((p) => ({
+  return ((res.requests as Record<string, unknown>[]) ?? []).slice(0, limit).map((p) => ({
     id: String(p.id ?? p.SK ?? "").replace(/^PAYREQ#/, ""),
     partnerId: String(p.partnerId ?? ""),
     partnerName: String(p.partnerName ?? p.partnerId ?? "—"),
@@ -419,7 +419,7 @@ function mapSellRequest(raw: Record<string, unknown>): SellRequestRecord {
 export async function listSellRequests(limit = 300) {
   await requirePermission("commerce:read");
   const res = await api.listSell();
-  return (res.requests as Record<string, unknown>[]).slice(0, limit).map(mapSellRequest);
+  return ((res.requests as Record<string, unknown>[]) ?? []).slice(0, limit).map(mapSellRequest);
 }
 
 export async function updateSellRequestStatus(
@@ -437,7 +437,7 @@ export async function updateSellRequestStatus(
 export async function listProducts() {
   await requirePermission("commerce:read");
   const res = await api.listProducts();
-  return (res.products as Record<string, unknown>[]).map((p) => ({
+  return ((res.products as Record<string, unknown>[]) ?? []).map((p) => ({
     id: String(p.id ?? ""),
     ...p,
   }));
@@ -520,12 +520,12 @@ export async function listOrders(): Promise<OrderRecord[]> {
   await requirePermission("commerce:read");
   const [res, usersRes] = await Promise.all([api.listOrders(), api.listUsers()]);
   const userNameById = new Map(
-    (usersRes.users as Record<string, unknown>[]).map((u) => [
+    ((usersRes.users as Record<string, unknown>[]) ?? []).map((u) => [
       String(u.uid ?? u.id ?? ""),
       String(u.name ?? u.displayName ?? u.email ?? ""),
     ]),
   );
-  return (res.orders as Record<string, unknown>[]).map((row) => mapOrder(row, userNameById));
+  return ((res.orders as Record<string, unknown>[]) ?? []).map((row) => mapOrder(row, userNameById));
 }
 
 export async function advanceOrderStatus(userId: string, orderId: string, status: string) {
@@ -643,13 +643,24 @@ export async function upsertBuyer(_input: Record<string, unknown>) {
 }
 
 export async function getImpactStats() {
-  const cov = await api.coverage();
-  return {
-    wasteDivertedKg: Number(cov.wasteDivertedKg ?? 0) || 0,
-    carbonSavedKg: Number(cov.carbonSavedKg ?? 0) || 0,
-    householdsServed: Number(cov.households ?? 0) || 0,
-    partnersActive: Number(cov.partnersOnline ?? 0) || 0,
-  };
+  const { demoImpactStats } = await import("@/lib/analytics/demo");
+  const base = demoImpactStats("30d");
+  try {
+    const cov = await api.coverage();
+    const divertedKg = Number(cov.wasteDivertedKg ?? base.divertedKg) || base.divertedKg;
+    const carbonKg = Number(cov.carbonSavedKg ?? divertedKg * 2.2) || divertedKg * 2.2;
+    return {
+      ...base,
+      divertedKg,
+      divertedTons: (divertedKg / 1000).toFixed(1),
+      carbonTons: (carbonKg / 1000).toFixed(1),
+      recoveryRate: String(cov.coveragePct ?? base.recoveryRateValue),
+      recoveryRateValue: Number(cov.coveragePct ?? base.recoveryRateValue) || base.recoveryRateValue,
+    };
+  } catch (error) {
+    console.error("[wasty] AWS impact fallback:", error instanceof Error ? error.message : error);
+    return base;
+  }
 }
 
 export async function lookupPassport(id: string) {
@@ -682,6 +693,7 @@ export async function getAnalyticsDashboard(range: "7d" | "30d" | "90d" = "30d")
         partnersOnline: Number(cov.partnersOnline ?? partners.length) || partners.length,
         partnersTotal: partners.length,
         recoveryRate: Number(cov.coveragePct ?? base.overview.recoveryRate) || 0,
+        divertedKg: Number(cov.wasteDivertedKg ?? base.overview.divertedKg) || base.overview.divertedKg,
       },
     };
   } catch (error) {
@@ -691,26 +703,61 @@ export async function getAnalyticsDashboard(range: "7d" | "30d" | "90d" = "30d")
 }
 
 export async function getCommandCenterStats() {
-  const [snap, cov] = await Promise.all([api.snapshot(), api.coverage()]);
-  const partners = (snap.partners as unknown[]) ?? [];
-  return {
-    activeJobs: ((snap.jobs as unknown[]) ?? []).length,
-    onlinePartners: Number(cov.partnersOnline ?? partners.length) || partners.length,
-    totalPartners: partners.length,
-    openAlerts: ((snap.alerts as unknown[]) ?? []).length,
-    binsMonitored: ((snap.bins as unknown[]) ?? []).length,
-    coveragePct: Number(cov.coveragePct ?? 0) || 0,
-    completedToday: Number(cov.completedToday ?? 0) || 0,
-  };
+  try {
+    const [snap, cov] = await Promise.all([api.snapshot(), api.coverage()]);
+    const jobs = (snap.jobs as unknown[]) ?? [];
+    const partners = (snap.partners as unknown[]) ?? [];
+    const alerts = (snap.alerts as unknown[]) ?? [];
+    return {
+      totalJobs: jobs.length,
+      activeJobs: jobs.length,
+      onlinePartners: Number(cov.partnersOnline ?? partners.length) || partners.length,
+      totalPartners: partners.length,
+      openAlerts: alerts.length,
+      binsMonitored: ((snap.bins as unknown[]) ?? []).length,
+      coveragePct: Number(cov.coveragePct ?? 0) || 0,
+      completedToday: Number(cov.completedToday ?? 0) || 0,
+    };
+  } catch (error) {
+    console.error("[wasty] AWS command-center fallback:", error instanceof Error ? error.message : error);
+    return {
+      totalJobs: 0,
+      activeJobs: 0,
+      onlinePartners: 0,
+      totalPartners: 0,
+      openAlerts: 0,
+      binsMonitored: 0,
+      coveragePct: 0,
+      completedToday: 0,
+    };
+  }
 }
 
-export async function getComplianceDashboard(_range?: string) {
-  return getAnalyticsDashboard();
+export async function getComplianceDashboard(range: "7d" | "30d" | "90d" = "30d") {
+  const { demoComplianceDashboard } = await import("@/lib/analytics/demo");
+  return demoComplianceDashboard(range);
 }
 
-export async function getCommandDeskData(_range?: string) {
-  const snap = await api.snapshot();
-  return { jobs: snap.jobs, alerts: snap.alerts, ts: nowIso() };
+export async function getCommandDeskData(range: "7d" | "30d" | "90d" = "30d") {
+  const { demoCommandDesk } = await import("@/lib/government/demo");
+  const base = demoCommandDesk(range);
+  try {
+    const snap = await api.snapshot();
+    const jobs = (snap.jobs as unknown[]) ?? [];
+    const alerts = (snap.alerts as unknown[]) ?? [];
+    return {
+      ...base,
+      range,
+      queue: {
+        ...base.queue,
+        jobsActive: jobs.length,
+        partnerAlertsOpen: alerts.length,
+      },
+    };
+  } catch (error) {
+    console.error("[wasty] AWS command-desk fallback:", error instanceof Error ? error.message : error);
+    return base;
+  }
 }
 
 function mapCitizenReport(
@@ -742,7 +789,7 @@ export async function listCitizenReports(filters?: {
   await requirePermission("citizen_reports:read");
   const [res, usersRes] = await Promise.all([api.listReports(), api.listUsers()]);
   const usersById = new Map(
-    (usersRes.users as Record<string, unknown>[]).map((u) => {
+    ((usersRes.users as Record<string, unknown>[]) ?? []).map((u) => {
       const uid = String(u.uid ?? u.id ?? "");
       return [
         uid,
@@ -753,7 +800,7 @@ export async function listCitizenReports(filters?: {
       ];
     }),
   );
-  let rows = (res.reports as Record<string, unknown>[]).map((raw) => mapCitizenReport(raw, usersById));
+  let rows = ((res.reports as Record<string, unknown>[]) ?? []).map((raw) => mapCitizenReport(raw, usersById));
   if (filters?.status) rows = rows.filter((r) => r.status === filters.status);
   if (filters?.issueType) rows = rows.filter((r) => r.issueType === filters.issueType);
   if (filters?.limit) rows = rows.slice(0, filters.limit);
@@ -800,10 +847,15 @@ export async function listGovernmentAudit(limit = 100) {
 
 export async function getLiveMapSnapshot(): Promise<LiveMapSnapshot> {
   await requirePermission("map:read");
-  const snap = await api.snapshot();
+  const snap = await api.snapshot().catch(() => ({
+    jobs: [] as unknown[],
+    partners: [] as unknown[],
+    alerts: [] as unknown[],
+    bins: [] as unknown[],
+  }));
   const points: LiveMapPoint[] = [];
 
-  for (const raw of snap.jobs as Record<string, unknown>[]) {
+  for (const raw of (snap.jobs as Record<string, unknown>[]) ?? []) {
     const job = mapJob(raw);
     const geo = geoOf(raw);
     if (!geo) continue;
@@ -824,7 +876,7 @@ export async function getLiveMapSnapshot(): Promise<LiveMapSnapshot> {
     });
   }
 
-  for (const raw of snap.partners as Record<string, unknown>[]) {
+  for (const raw of (snap.partners as Record<string, unknown>[]) ?? []) {
     const partner = mapPartner(raw);
     const geo = geoOf(raw);
     if (!geo) continue;
@@ -846,7 +898,7 @@ export async function getLiveMapSnapshot(): Promise<LiveMapSnapshot> {
     });
   }
 
-  for (const raw of snap.bins as Record<string, unknown>[]) {
+  for (const raw of (snap.bins as Record<string, unknown>[]) ?? []) {
     const geo = geoOf(raw);
     if (!geo) continue;
     const id = String(raw.id ?? raw.code ?? "");
@@ -873,7 +925,7 @@ export async function getLiveMapSnapshot(): Promise<LiveMapSnapshot> {
       pickups: points.filter((p) => p.kind === "pickup").length,
       vehicles: points.filter((p) => p.kind === "vehicle").length,
       bins: points.filter((p) => p.kind === "bin").length,
-      alerts: (snap.alerts as unknown[]).length,
+      alerts: ((snap.alerts as unknown[]) ?? []).length,
     },
     generatedAt: nowIso(),
   };
