@@ -13,7 +13,7 @@ export function HeroSection({ loginHref }: { loginHref: string }) {
       <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
         <div className="space-y-6">
           <p className="inline-flex rounded-full border bg-background/70 px-3 py-1 font-medium text-xs">
-            {APP_CONFIG.publicSite.domain}
+            {APP_CONFIG.publicSite.domain} · {APP_CONFIG.company.legalName}
           </p>
           <h1 className="max-w-xl font-semibold text-4xl tracking-tight sm:text-5xl">
             Smart waste management for cities and communities

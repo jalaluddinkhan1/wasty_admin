@@ -5,7 +5,14 @@ const currentYear = new Date().getFullYear();
 export const APP_CONFIG = {
   name: "Wasty Admin",
   version: packageJson.version,
-  copyright: `© ${currentYear}, Wasty.`,
+  copyright: `© ${currentYear} GNUFOX PRIVATE LIMITED. All rights reserved.`,
+  company: {
+    legalName: "GNUFOX PRIVATE LIMITED",
+    brand: "Wasty",
+    supportEmail: "support@wasty.app",
+    privacyEmail: "privacy@wasty.app",
+    grievanceEmail: "grievance@wasty.app",
+  },
   meta: {
     title: "Wasty Admin — Waste Management Control Center",
     description:
@@ -18,5 +25,7 @@ export const APP_CONFIG = {
     description:
       "Wasty helps cities, communities, and operators collect, sort, and recover waste with live tracking, MRF intelligence, and measurable impact.",
     loginUrl: "/auth/v2/login",
+    privacyUrl: "/privacy",
+    termsUrl: "/terms",
   },
 };

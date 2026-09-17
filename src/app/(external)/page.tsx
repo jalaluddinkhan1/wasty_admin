@@ -38,6 +38,31 @@ export default async function Home() {
             </article>
           </div>
         </section>
+        <section className="border-t bg-muted/30">
+          <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div>
+              <h2 className="font-semibold text-lg">Legal &amp; company</h2>
+              <p className="mt-1 text-muted-foreground text-sm">
+                Wasty is operated by GNUFOX PRIVATE LIMITED. Read how we handle your data and the rules for using
+                the apps.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="/privacy"
+                className="inline-flex h-10 items-center rounded-lg border bg-background px-4 text-sm font-medium hover:bg-accent"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="/terms"
+                className="inline-flex h-10 items-center rounded-lg border bg-background px-4 text-sm font-medium hover:bg-accent"
+              >
+                Terms of Service
+              </a>
+            </div>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </div>
