@@ -30,5 +30,6 @@ export const APP_CONFIG = {
     loginUrl: "/auth/v2/login",
     privacyUrl: "/privacy",
     termsUrl: "/terms",
+    siteUrl: "https://www.wasty.in",
   },
 };

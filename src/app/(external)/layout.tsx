@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: APP_CONFIG.publicSite.title,
     description: APP_CONFIG.publicSite.description,
-    url: `https://${APP_CONFIG.publicSite.domain}`,
+    url: APP_CONFIG.publicSite.siteUrl,
     siteName: APP_CONFIG.publicSite.name,
   },
 };
