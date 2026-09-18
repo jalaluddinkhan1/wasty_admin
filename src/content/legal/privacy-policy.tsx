@@ -53,6 +53,8 @@ export function PrivacyPolicyContent() {
         Privacy &amp; data requests:{" "}
         <a href={`mailto:${company.privacyEmail}`}>{company.privacyEmail}</a>
         <br />
+        General info: <a href={`mailto:${company.infoEmail}`}>{company.infoEmail}</a>
+        <br />
         Support: <a href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>
         <br />
         Phone:{" "}
@@ -569,6 +571,8 @@ export function PrivacyPolicyContent() {
         Privacy: <a href={`mailto:${company.privacyEmail}`}>{company.privacyEmail}</a>
         <br />
         Support: <a href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>
+        <br />
+        Info: <a href={`mailto:${company.infoEmail}`}>{company.infoEmail}</a>
         <br />
         Phone: <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
         <br />

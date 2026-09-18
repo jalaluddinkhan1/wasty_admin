@@ -298,6 +298,8 @@ export function TermsOfServiceContent() {
         <br />
         Privacy: <a href={`mailto:${company.privacyEmail}`}>{company.privacyEmail}</a>
         <br />
+        Info: <a href={`mailto:${company.infoEmail}`}>{company.infoEmail}</a>
+        <br />
         Phone: <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
         <br />
         Grievance: <a href={`mailto:${company.grievanceEmail}`}>{company.grievanceEmail}</a>

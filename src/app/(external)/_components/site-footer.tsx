@@ -14,8 +14,8 @@ export function SiteFooter() {
             <p className="text-muted-foreground">A product of {company.legalName}</p>
             <p className="text-muted-foreground">{copyright}</p>
             <p className="text-muted-foreground">
-              <a href={`mailto:${company.supportEmail}`} className="hover:text-foreground">
-                {company.supportEmail}
+              <a href={`mailto:${company.infoEmail}`} className="hover:text-foreground">
+                {company.infoEmail}
               </a>
               {" · "}
               <a href={`tel:${company.phoneE164}`} className="hover:text-foreground">
@@ -34,7 +34,7 @@ export function SiteFooter() {
               Terms of Service
             </Link>
             <a href={`mailto:${company.supportEmail}`} className="hover:text-foreground">
-              Email
+              Support
             </a>
             <a href={`tel:${company.phoneE164}`} className="hover:text-foreground">
               Call

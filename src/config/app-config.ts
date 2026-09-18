@@ -9,9 +9,10 @@ export const APP_CONFIG = {
   company: {
     legalName: "GNUFOX PRIVATE LIMITED",
     brand: "Wasty",
-    supportEmail: "info@wasty.in",
-    privacyEmail: "info@wasty.in",
-    grievanceEmail: "info@wasty.in",
+    infoEmail: "info@wasty.in",
+    supportEmail: "support@wasty.in",
+    privacyEmail: "privacy@wasty.in",
+    grievanceEmail: "grievance@wasty.in",
     phoneDisplay: "+91 72053 19320",
     phoneE164: "+917205319320",
   },
@@ -22,7 +23,7 @@ export const APP_CONFIG = {
   },
   publicSite: {
     name: "Wasty",
-    domain: "wastey.in",
+    domain: "wasty.in",
     title: "Wasty — Smart waste management for cities",
     description:
       "Wasty helps cities, communities, and operators collect, sort, and recover waste with live tracking, MRF intelligence, and measurable impact.",
