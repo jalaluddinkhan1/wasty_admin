@@ -55,8 +55,12 @@ export function PrivacyPolicyContent() {
         <br />
         Support: <a href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>
         <br />
+        Phone:{" "}
+        <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
+        <br />
         Grievance / authorised contact for privacy queries:{" "}
-        <a href={`mailto:${company.grievanceEmail}`}>{company.grievanceEmail}</a>
+        <a href={`mailto:${company.grievanceEmail}`}>{company.grievanceEmail}</a>{" "}
+        / <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
       </p>
       <p>
         Where we engage cloud or messaging providers to process data on our behalf, they act as Data
@@ -515,7 +519,7 @@ export function PrivacyPolicyContent() {
         <br />
         Email: <a href={`mailto:${company.grievanceEmail}`}>{company.grievanceEmail}</a>
         <br />
-        Also copy: <a href={`mailto:${company.privacyEmail}`}>{company.privacyEmail}</a>
+        Phone: <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
       </p>
       <p>
         Please include your name, registered phone/email, description of the issue, and any job or
@@ -565,6 +569,8 @@ export function PrivacyPolicyContent() {
         Privacy: <a href={`mailto:${company.privacyEmail}`}>{company.privacyEmail}</a>
         <br />
         Support: <a href={`mailto:${company.supportEmail}`}>{company.supportEmail}</a>
+        <br />
+        Phone: <a href={`tel:${company.phoneE164}`}>{company.phoneDisplay}</a>
         <br />
         Grievance: <a href={`mailto:${company.grievanceEmail}`}>{company.grievanceEmail}</a>
         <br />

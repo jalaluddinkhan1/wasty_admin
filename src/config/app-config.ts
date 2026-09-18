@@ -9,9 +9,11 @@ export const APP_CONFIG = {
   company: {
     legalName: "GNUFOX PRIVATE LIMITED",
     brand: "Wasty",
-    supportEmail: "support@wasty.app",
-    privacyEmail: "privacy@wasty.app",
-    grievanceEmail: "grievance@wasty.app",
+    supportEmail: "info@wasty.in",
+    privacyEmail: "info@wasty.in",
+    grievanceEmail: "info@wasty.in",
+    phoneDisplay: "+91 72053 19320",
+    phoneE164: "+917205319320",
   },
   meta: {
     title: "Wasty Admin — Waste Management Control Center",
